@@ -1,0 +1,37 @@
+name: Verify
+on: [push, pull_request]
+jobs:
+  checks:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_PASSWORD: ci-password
+          POSTGRES_DB: quiet_insights_test
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd pg_isready --health-interval 10s
+          --health-timeout 5s --health-retries 5
+    env:
+      DATABASE_URL: postgresql://postgres:ci-password@127.0.0.1:5432/quiet_insights_test
+      TEST_DATABASE_URL: postgresql://postgres:ci-password@127.0.0.1:5432/quiet_insights_test
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - uses: pnpm/action-setup@v4
+        with:
+          version: '11.19.0'
+      - run: pnpm install --frozen-lockfile
+      - run: npm test
+      - run: npm run typecheck
+      - run: node --test tests/database.test.ts
+      - run: npm run build
+      - name: Verify production API
+        run: |
+          npm start > /tmp/quiet-insights-server.log 2>&1 &
+          QUIET_SERVER_PID=$!
+          trap 'kill "$QUIET_SERVER_PID"' EXIT
+          node --test tests/api.test.ts
