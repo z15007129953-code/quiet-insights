@@ -36,6 +36,9 @@ test('live API isolates workspaces and handles ingestion contracts', async () =>
   const noOrigin = await fetch(`${base}/api/manage`, { method: 'POST', headers: { cookie, 'content-type': 'application/json' }, body: JSON.stringify({ action: 'createApp', name: 'Must reject' }) });
   assert.equal(noOrigin.status, 400, 'Management writes require a matching origin');
   const createdBody = created.body as { app: { id: string }; key: string; keys: { development: string } };
+  assert.match(createdBody.key, /^qi_/);
+  assert.match(createdBody.keys.development, /^qi_/);
+  assert.notEqual(createdBody.key, createdBody.keys.development);
   const event = { name: 'api_opened', timestamp: new Date().toISOString(), deviceId: 'api-device', sessionId: 'api-session', version: '1.0.0', os: 'iOS', country: 'CN', properties: { screen: 'home', source: 'test' } };
   const batch = { batchId: `api-${Date.now()}`, events: [event] };
   const sent = await request('/api/v1/events', { method: 'POST', headers: { authorization: `Bearer ${createdBody.key}`, 'content-type': 'application/json' }, body: JSON.stringify(batch) });
