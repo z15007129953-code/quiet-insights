@@ -63,6 +63,17 @@ export async function saveFunnel(workspaceId: string, appId: string, name: strin
   return result;
 }
 
+export async function funnelByName(workspaceId: string, appId: string, name: string, db: Sql = defaultSql()) {
+  const [result] = await db<{ id: string; name: string; steps: string[]; windowHours: number }[]>`
+    SELECT f.id, f.name, f.steps, f.window_hours AS "windowHours"
+    FROM funnels f
+    JOIN applications a ON a.id = f.app_id
+    WHERE f.app_id = ${appId} AND a.workspace_id = ${workspaceId} AND f.name = ${name}
+    ORDER BY f.created_at
+    LIMIT 1`;
+  return result ?? null;
+}
+
 export async function updateRetention(workspaceId: string, appId: string, days: 7 | 30 | 90, db: Sql = defaultSql()): Promise<App> {
   const [app] = await db<App[]>`UPDATE applications SET retention_days = ${days} WHERE id = ${appId} AND workspace_id = ${workspaceId} RETURNING id,name,retention_days AS retention`;
   if (!app) throw new Error('Application not found');

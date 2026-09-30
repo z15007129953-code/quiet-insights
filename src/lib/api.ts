@@ -45,6 +45,8 @@ async function seedDemo(app: App, keys: Record<Environment, string>, db: ReturnT
     const at = new Date(now - day * 86_400_000 - 60 * 60_000 + step * 15 * 60_000);
     return { name: names[step], timestamp: at.toISOString(), deviceId: `demo-device-${day % 11}`, sessionId: `demo-session-${day}`, version: day % 3 === 0 ? '1.1.0' : '1.0.0', os: day % 2 ? 'Android' : 'iOS', country: day % 3 ? 'US' : 'CN', properties: { screen: step % 2 ? 'editor' : 'home', plan: day % 4 ? 'free' : 'pro', source: 'demo' } };
   });
+  // Seed data through the same ingestion path as a real application, while
+  // keeping every timestamp safely in the past so clock skew cannot reject it.
   await ingest(app.id, 'production', { batchId: `demo-${randomBytes(8).toString('hex')}`, events }, 30, db);
   void keys;
 }
