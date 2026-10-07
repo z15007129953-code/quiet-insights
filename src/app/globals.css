@@ -70,3 +70,5 @@ footer{grid-column:2;display:flex;align-items:center;justify-content:space-betwe
 
 .demo-box{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px 24px;align-items:center;padding:24px;margin:26px 0 20px;border:1px solid var(--accent);border-radius:7px;background:var(--soft)}.demo-box h3{font-size:1.08rem;margin:2px 0 6px}.demo-box p:not(.eyebrow){max-width:60ch;color:var(--muted);font-size:.82rem;line-height:1.6}.demo-box .eyebrow{margin:0;color:var(--accent-ink)}.demo-box>span{grid-column:1 / -1;color:var(--accent-ink);font-size:.72rem;font-weight:650}
 @media(max-width:720px){.demo-box{grid-template-columns:1fr}.demo-box .button{width:100%}.demo-box>span{grid-column:auto}}
+/* Static overview controls communicate the active query without pretending to be filters. */
+.reference-static-filter{cursor:default}
